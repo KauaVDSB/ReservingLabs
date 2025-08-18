@@ -9,6 +9,23 @@ typedef struct {
 } Horario;
 
 
+// Estruturas para Professores e Administração
+
+typedef struct {
+    int id;
+    char nome[100];
+    char email[100];
+    char senha[100];
+} Professor;
+
+typedef struct {
+    int id;
+    char nome[100];
+    char email[100];
+    char senha[100];
+} Admin;
+
+
 // Estruturas para manipulação dos Laboratórios
 
 typedef enum {
