@@ -1,71 +1,90 @@
+from flask_login import UserMixin
+
 from app import db
+import datetime
 
 
+class User(db.Model, UserMixin):
+    """
+    Classe para usuários, sendo eles professores,
+    admins ou ambos simultaneamente.
 
-# Classes para Professores e Administração
-class Professor(db.Model):
+    * 'db.Model' mapeia a classe para a tabela
+    * 'UserMixin' fornece implementações padrão para a integração com o Flask-Login.
+    """
+
+    # nome da tabela no banco de dados
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
+    # a senha é criptografada antes de salva
     senha = db.Column(db.String(200), nullable=False)
-    # def _init_(self, id: int, nome: str, email: str, senha: str):
-    #     self.id = id
-    #     self.nome = nome
-    #     self.email = email
-    #     self.senha = senha
 
-# class Admin(db.Model):
-#     def _init_(self, id: int, nome: str, email: str, senha: str):
-#         self.id = id
-#         self.nome = nome
-#         self.email = email
-#         self.senha = senha
+    # flags que definem se o usuário é professor ou admin (0=False, 1=True)
+    professor = db.Column(db.Integer, default=1, nullable=False)
+    admin = db.Column(db.Integer, default=0, nullable=False)
 
-# # Classes para manipulação dos Laboratórios
-# class StatusLab:
-#     LAB_ATIVO = 1
-#     LAB_INDISPONIVEL = 0
-
-# class Laboratorio:
-#     def _init_(self, id: int, nome: str, capacidade: int, equipamentos: str, abertura: Horario, fechamento: Horario, status: StatusLab):
-#         self.id = id
-#         self.nome = nome
-#         self.capacidade = capacidade
-#         self.equipamentos = equipamentos
-#         self.abertura = abertura
-#         self.fechamento = fechamento
-#         self.status = status
-
-# class SolicitaLab:
-#     def _init_(self, id: int, solicitante: str, idLaboratorio: int, data: Data, inicio: Horario, fim: Horario):
-#         self.id = id
-#         self.solicitante = solicitante
-#         self.idLaboratorio = idLaboratorio
-#         self.data = data
-#         self.inicio = inicio
-#         self.fim = fim
-
-# # Coleções Dinâmicas (representadas como listas em Python)
-# class LabsCollection:
-#     def _init_(self):
-#         self.labs = []
-
-# class SolicitacoesCollection:
-#     def _init_(self):
-#         self.solicitacoes = []
+    """
+    'db.relationship' define a relação entre esta classe e a classe 'Solicitacao'.
+    * A relação é um-para-muitos: um User pode ter muitas Solicitacoes.
+    * 'Solicitacao' é o nome da classe relacionada.
+    * 'back_populates' cria a ligação bidirecional, ligando a este objeto
+    a propriedade 'user' na classe Solicitacao.
+    """
+    solicitacoes = db.relationship(
+        'Solicitacao', back_populates='user', lazy=True
+    )
 
 
 
+class Laboratorio(db.Model):
+    """ Representa a tabela de laboratorios """
+    __tablename__ = 'labs'
 
-# # Classes para data e horário
-# class Data:
-#     def _init_(self, dia: int, mes: int, ano: int):
-#         self.dia = dia
-#         self.mes = mes
-#         self.ano = ano
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), nullable=False)
+    capacidade = db.Column(db.Integer, nullable=False)
+    equipamentos = db.Column(db.String(200), nullable=False)
+    abertura = db.Column(db.Time, nullable=False)
+    fechamento = db.Column(db.Time, nullable=False)
+    status = db.Column(db.String(12), default="Disponível", nullable=False)
 
-# class Horario:
-#     def _init_(self, hora: int, minuto: int):
-#         self.hora = hora
-#         self.minuto = minuto
+    """ Relacao um-para-muitos: Um laboratorio pode ter muitas Solicitacoes. 
+        aponta para lab em Solicitacao.
+    """
+    solicitacoes = db.relationship(
+        'Solicitacao', back_populates='lab', lazy=True
+    )
+
+
+
+class Solicitacao(db.Model):
+    """ Representa as solicitacoes de laboratorios. """
+
+    __tablename__ = 'solicitacoes'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    data_solicitacao = db.Column(
+        db.DateTime, default=datetime.datetime.utcnow, nullable=False
+    )
+    # Datas de inicio e fim da reserva.
+    data_agendada = db.Column(db.DateTime, nullable=False)
+    data_encerramento = db.Column(db.DateTime, nullable=False)
+
+    # 'db.ForeignKey' define a chave estrangeira.
+    # Estas colunas referenciam os 'id' das tabela referentes.
+    # É o lado "muitos" da relação.
+    id_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    id_lab = db.Column(db.Integer, db.ForeignKey('labs.id'), nullable=False)
+
+
+    # Relações bidirecionais que ligam de volta às classes User e Laboratorio.
+    # Permite acessar os objetos User e Laboratorio a partir de um objeto Solicitacao.
+    # 'back_populates' aponta para a propriedade 'solicitacoes' na classe User e Laboratorio.
+    user = db.relationship('User', back_populates='solicitacoes')
+    lab = db.relationship('Laboratorio', back_populates='solicitacoes')
+
 

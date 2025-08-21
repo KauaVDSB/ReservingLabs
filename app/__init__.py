@@ -6,6 +6,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 from dotenv import load_dotenv
 
@@ -22,6 +23,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+
+from app.models import User, Laboratorio, Solicitacao
 
 # Importa rotas necessárias na inicialização do app
 from app.routes import homepage, login
