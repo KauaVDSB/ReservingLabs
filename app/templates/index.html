@@ -1,1 +1,10 @@
-Hello world! :D
+{% extends 'base/base.html' %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('login') }}">Login</a>
+{% endblock %}

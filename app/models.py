@@ -1,7 +1,13 @@
 from flask_login import UserMixin
 
-from app import db
+from app import db, login_manager
 import datetime
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """ Função wrapper para recuperar dados do usuário. """
+    return User.query.get(int(user_id))
 
 
 class User(db.Model, UserMixin):

@@ -1,1 +1,10 @@
-bye world! D:
+{% extends 'base/base.html' %}
+
+{% block title %}Login{% endblock %}
+
+
+{% block content %}
+
+<a href="{{ url_for('cadastro') }}">Não tem login? Cadastre-se agora.</a>
+
+{% endblock %}
