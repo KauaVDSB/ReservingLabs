@@ -3,7 +3,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, db
 from app.models import User
-from app.forms import UserForm
+from app.forms import UserForm, LabForm
 
 
 @app.route("/")
@@ -16,6 +16,13 @@ def homepage():
 def login():
     """Renderiza rota para login"""
     return render_template("auth/login.html")
+
+
+@app.route("/logout")
+def logout():
+    """ Desloga usuário a sessão """
+    logout_user()
+    return redirect(url_for("homepage"))
 
 
 @app.route("/cadastro", methods=["GET", "POST"])
@@ -33,7 +40,25 @@ def cadastro():
 
 
 
+@app.route("/labs/create", methods=["GET", "POST"])
+@login_required
+def labs_create():
+    form = LabForm()
+
+    if form.validate_on_submit():
+        lab = form.save()
+        if lab:
+            url_homepage = url_for('homepage')
+            return (
+                f"Laboratório {lab.nome} com capacidade: {lab.capacidade} foi "
+                "criado com sucesso.<hr>"
+                f'<a href="{url_homepage}">Voltar</a>')
+
+    return render_template("labs/create.html", form=form)
+
+
 @app.route("/tornar-admin/<int:user_id>", methods=["GET", "POST"])
+@login_required
 def tornar_admin(user_id):
     user = User.query.get(user_id)
 

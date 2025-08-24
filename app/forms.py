@@ -3,6 +3,8 @@ from wtforms import (
     StringField,
     EmailField,
     PasswordField,
+    IntegerField,
+    TimeField,
 
     SubmitField
 )
@@ -11,11 +13,12 @@ from wtforms.validators import (
 )
 
 from app import db, bcrypt
-from app.models import User
+from app.models import User, Laboratorio
 
 
 
 class UserForm(FlaskForm):
+    """ Formulário para Cadastro de Usuários """
     nome = StringField("Nome", validators=[DataRequired()])
     email = EmailField("E-mail", validators=[DataRequired(), Email()])
     senha = PasswordField("Senha", validators=[DataRequired()])
@@ -68,4 +71,44 @@ class UserForm(FlaskForm):
             db.session.rollback()
             raise ValidationError(
                 "Erro ao salvar usuário:", e
+            )
+
+
+# Formulário de login
+
+
+
+class LabForm(FlaskForm):
+    """ Formulário para Manipulação de Laboratórios """
+
+    nome = StringField("Nome do laboratório", validators=[DataRequired()])
+    capacidade = IntegerField("Capacidade do laboratório", validators=[DataRequired()])
+    equipamentos = StringField("Equipamentos disponíveis", validators=[DataRequired()])
+    abertura = TimeField("Horário de", validators=[DataRequired()])
+    fechamento = TimeField("Horário de", validators=[DataRequired()])
+
+    submit = SubmitField("Criar Laboratório")
+
+
+    def save(self):
+        # Salva objeto na tabela Laboratorios
+
+        try:
+            lab = Laboratorio(
+                nome = self.nome.data,
+                capacidade = self.capacidade.data,
+                equipamentos = self.equipamentos.data,
+                abertura = self.abertura.data,
+                fechamento = self.fechamento.data
+            )
+
+            db.session.add(lab)
+            db.session.commit()
+
+
+            return lab
+        except Exception as e:
+            db.session.rollback()
+            raise ValidationError(
+                "Erro ao cadastrar laboratório:", e
             )
