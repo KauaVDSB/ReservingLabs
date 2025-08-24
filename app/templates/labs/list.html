@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Labs - Lista{% endblock %}
+
+
+{% block content %}
+<h1>Lista de Laboratórios</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Capacidade</th>
+            <th>Abertura</th>
+            <th>Fechamento</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lab in labs %}
+            <tr>
+                <th>{{ lab.id }}</th>
+                <th>{{ lab.nome }}</th>
+                <th>{{ lab.capacidade }}</th>
+                <th>{{ lab.abertura }}</th>
+                <th>{{ lab.fechamento }}</th>
+                <th>{{ lab.status }}</th>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('homepage') }}">Voltar</a>
+
+{% endblock %}
