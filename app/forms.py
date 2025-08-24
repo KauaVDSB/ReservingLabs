@@ -4,7 +4,9 @@ from wtforms import (
     EmailField,
     PasswordField,
     IntegerField,
+    DateTimeField,
     TimeField,
+    SelectField,
 
     SubmitField
 )
@@ -112,3 +114,11 @@ class LabForm(FlaskForm):
             raise ValidationError(
                 "Erro ao cadastrar laboratório:", e
             )
+
+
+# TODO: Terminar depois
+class SolicitacaoForm(FlaskForm):
+    lab = SelectField(
+        "Laboratório", coerce=int, choices=[], validators=[DataRequired()]
+    )
+    data_agendada = DateTimeField()
