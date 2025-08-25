@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Labs - Criar{% endblock %}
+
+
+{% block content %}
+
+<form action="" method="post">
+
+    {{ form.csrf_token }}
+
+    {{ form.nome(placeholder="Nome do Lab.") }}
+    <br>
+    {{ form.capacidade(placeholder="30") }}
+    <br>
+    {{ form.equipamentos(placeholder="30 Computadores...") }}
+    <br>
+    {{ form.abertura(placeholder="10:00") }}
+    <br>
+    {{ form.fechamento(placeholder="21:40") }}
+    <br>
+    {{ form.submit() }}
+
+</form>
+
+<a href="{{ url_for('homepage') }}">Voltar</a>
+
+{% endblock %}

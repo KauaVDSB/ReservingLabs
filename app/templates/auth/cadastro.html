@@ -1,0 +1,26 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Cadastro{% endblock %}
+
+
+{% block content %}
+<h1>Cadastro</h1>
+<form action="" method="post">
+
+    {{ form.csrf_token }}
+
+    {{ form.nome(placeholder="Digite seu nome") }}
+    <br>
+    {{ form.email(placeholder="professor@exemplo.com") }}
+    <br>
+    {{ form.senha(placeholder="Digite sua senha") }}
+    <br>
+    {{ form.confirmar_senha(placeholder="Confirme sua senha") }}
+    <br>
+    {{ form.submit() }}
+
+</form>
+
+<a href="{{ url_for('login') }}">Já tem login? Entre agora.</a>
+
+{% endblock %}
