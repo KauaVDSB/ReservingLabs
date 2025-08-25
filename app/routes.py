@@ -6,7 +6,7 @@ from app.models import User
 from app.forms import UserForm
 
 
-@app.route("/")
+@app.route("/") #/homepage é padrão
 def homepage():
     """Renderiza rota para homepage"""
     return render_template("index.html")

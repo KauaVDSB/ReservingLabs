@@ -1,13 +1,14 @@
-from flask_login import UserMixin
+from flask_login import UserMixin #reconhecer tabela de usuarios
 
-from app import db, login_manager
-import datetime
+from app import db, login_manager #pasta app/__init__.py
+import datetime #salvar horarios
 
 
-@login_manager.user_loader
+@login_manager.user_loader #identificador da função
 def load_user(user_id):
     """ Função wrapper para recuperar dados do usuário. """
-    return User.query.get(int(user_id))
+      #mantem os usuarios logados
+    return User.query.get(int(user_id)) #verificar dados do usuario do tal id
 
 
 class User(db.Model, UserMixin):
@@ -24,11 +25,12 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True)  #unicidade de e-mail
     # a senha é criptografada antes de salva
     senha = db.Column(db.String(200), nullable=False)
 
     # flags que definem se o usuário é professor ou admin (0=False, 1=True)
+    #por padrão o usuario começa como professor apenas, afinal o publico alvo são eles
     professor = db.Column(db.Integer, default=1, nullable=False)
     admin = db.Column(db.Integer, default=0, nullable=False)
 
@@ -40,7 +42,7 @@ class User(db.Model, UserMixin):
     a propriedade 'user' na classe Solicitacao.
     """
     solicitacoes = db.relationship(
-        'Solicitacao', back_populates='user', lazy=True
+        'Solicitacao', back_populates='user', lazy=True  #relacionando uma tabela com outra
     )
 
 
