@@ -93,6 +93,28 @@ def labs_list():
     return render_template("labs/list.html", labs=labs)
 
 
+#TODO: update lab
+
+@app.route("/labs/delete/<int:lab_id>", methods=["GET", "POST"])
+@login_required
+def labs_delete(lab_id):
+
+    if not current_user.admin:
+        return ("Acesso negado. 405 <hr>"
+                f'<a href="{get_url_homepage()}>Voltar</a>"')
+
+    lab = Laboratorio.query.get(lab_id)
+
+    try:
+        db.session.delete(lab)
+        db.session.commit()
+        return (f"Laboratório {lab.nome} deletado com sucesso.")
+    except Exception as e:
+        db.session.rollback()
+        
+        return "falha ao deletar laboratório:", e
+
+
 """ /SOLICITAR/ """
 @app.route("/solicitar/create", methods=["GET", "POST"])
 @login_required
@@ -120,11 +142,31 @@ def solicitar_create():
     return render_template("solicitacoes/create.html", form=form)
 
 
+@app.route("/solicitar/list")
+def solicitar_list():
+    solicitacoes = Solicitacao.query.all()
 
-""" /TEST/ """
-@app.route("/tornar-admin/<int:user_id>", methods=["GET", "POST"])
+    return render_template("solicitacoes/list.html", solicitacoes=solicitacoes)
+
+
+@app.route("/solicitar/delete/<int:id>", methods=["GET", "POST"])
+def solicitar_delete(solicitacao_id):
+    solicitacao = Solicitacao.query.get(solicitacao_id)
+
+    try:
+        db.session.delete(solicitacao)
+        db.session.commit()
+        return (f"Solicitação {solicitacao.id} para o laboratório {solicitacao.lab.nome} deletado com sucesso.")
+    except Exception as e:
+        db.session.rollback()
+        
+        return "falha ao deletar solicitação:", e
+
+
+""" /ADMIN/ """
+@app.route("/admin/alter/<int:user_id>", methods=["GET", "POST"])
 @login_required
-def tornar_admin(user_id):
+def admin_alter(user_id):
     user = User.query.get(user_id)
 
     try:
@@ -135,15 +177,3 @@ def tornar_admin(user_id):
         db.session.rollback()
         return "Falha ao tornar usuário em admin:", e
 
-
-@app.route("/solicitar/delete/<int:solicitacao_id>", methods=["GET", "POST"])
-def solicita_delete(solicitacao_id):
-    solicitacao = Solicitacao.query.get(solicitacao_id)
-
-    try:
-        db.session.delete(solicitacao)
-        db.session.commit()
-        return "Solicitação deletada com sucesso!"
-    except Exception as e:
-        db.session.rollback()
-        return "Falha ao deletar solicitação:", e
