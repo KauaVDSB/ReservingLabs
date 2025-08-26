@@ -11,7 +11,8 @@ def get_url_homepage():
 @app.route("/") #/homepage é padrão
 def homepage():
     """Renderiza rota para homepage"""
-    if current_user:
+    message=''
+    if current_user.is_authenticated:
         username = User.query.get(current_user.id).nome
         message = f', {username}'
     
@@ -81,6 +82,7 @@ def labs_list():
 
 """ /SOLICITAR/ """
 @app.route("/solicitar/create", methods=["GET", "POST"])
+@login_required
 def solicitar_create():
     """
     Rota para a criação de solicitações de laboratórios.
