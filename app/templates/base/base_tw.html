@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Solicita Lab{% endblock %}</title>
+
+    <!-- Inclui a biblioteca Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <!-- Inclui as estilizações globais -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base/styles.css') }}">
+    <!-- Biblioteca select2 para melhorias de campos SelectMultiple -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"
+        rel="stylesheet"
+    />
+
+    <!-- Bloco para CSS específico de cada página -->
+    {% block styles %}
+    {% endblock %}
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <!-- Inclui o cabeçalho, que pode ser um arquivo separado -->
+    {% include 'base/header.html' %}
+
+    <main class="container mx-auto p-8 flex-grow">
+        <!-- Bloco para exibir mensagens flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="border px-4 py-3 rounded relative mb-4 
+                        {% if category == 'success' %} bg-green-100 border-green-400 text-green-700
+                        {% elif category == 'danger' %} bg-red-100 border-red-400 text-red-700
+                        {% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Bloco para o conteúdo principal da página -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Inclui o rodapé, que pode ser um arquivo separado -->
+    {% include 'base/footer.html' %}
+
+    
+    <!-- JQuery necessário para select2 funcionar -->
+    <script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous">
+    </script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js">
+    </script>
+
+
+    <!-- Bloco para scripts JavaScript específicos de cada página -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

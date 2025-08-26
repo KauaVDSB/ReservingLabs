@@ -1,3 +1,4 @@
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -15,7 +16,7 @@ from wtforms.validators import (
 )
 
 from app import db, bcrypt
-from app.models import User, Laboratorio
+from app.models import User, Laboratorio, Solicitacao
 
 
 
@@ -116,9 +117,45 @@ class LabForm(FlaskForm):
             )
 
 
-# TODO: Terminar depois
+
 class SolicitacaoForm(FlaskForm):
     lab = SelectField(
         "Laboratório", coerce=int, choices=[], validators=[DataRequired()]
     )
-    data_agendada = DateTimeField()
+    # 'format' serve para que o WTForms saiba como interpretar a data do input HTML
+    # 'render_kw' exibe o seletor de data e hora do navegador.
+    data_agendada = DateTimeField(
+        "Data Agendada",
+        format='%Y-%m-%dT%H:%M', 
+        validators=[DataRequired()], 
+        render_kw={"type": "datetime-local"}
+        )
+    data_encerramento = DateTimeField(
+        "Data encerramento",
+        format='%Y-%m-%dT%H:%M', 
+        validators=[DataRequired()], 
+        render_kw={"type": "datetime-local"}
+    )
+
+    submit = SubmitField("Solicitar")
+
+
+    def save(self):
+
+        try:
+            solicitacao = Solicitacao(
+                data_agendada = self.data_agendada.data,
+                data_encerramento = self.data_encerramento.data,
+                user = current_user,
+                lab = Laboratorio.query.get(self.lab.data)
+            )
+
+            db.session.add(solicitacao)
+            db.session.commit()
+            return solicitacao
+        except Exception as e:
+            db.session.rollback()
+            raise ValidationError(
+                "Erro ao gerar solicitação:", e
+            )
+

@@ -1,0 +1,56 @@
+{% extends 'base/base_tw.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/labs/create.css') }}">
+{% endblock %}
+
+
+{% block content %}
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Solicitar Laboratório</h2>
+        <form method="POST">
+            {{ form.csrf_token }}
+            
+            <div class="mb-4">
+                {{ form.lab.label(class="block text-gray-700 font-semibold mb-2") }}
+                {{ form.lab(class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 select2-enabled") }}
+                {% for error in form.lab.errors %}
+                    <span class="text-red-500 text-sm mt-1">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                {{ form.data_agendada.label(class="block text-gray-700 font-semibold mb-2") }}
+                {{ form.data_agendada(class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50") }}
+                {% for error in form.data_agendada.errors %}
+                    <span class="text-red-500 text-sm mt-1">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-6">
+                {{ form.data_encerramento.label(class="block text-gray-700 font-semibold mb-2") }}
+                {{ form.data_encerramento(class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50") }}
+                {% for error in form.data_encerramento.errors %}
+                    <span class="text-red-500 text-sm mt-1">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <div>
+                {{ form.submit(class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors") }}
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    
+
+    <script>
+        $(function() {
+            $('.select2-enabled').select2({
+                placeholder: "Selecione um laboratório",
+                width: '100%'
+            });
+        });
+    </script>
+{% endblock %}
