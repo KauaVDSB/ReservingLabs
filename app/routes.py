@@ -8,7 +8,7 @@ from app.forms import UserForm, LabForm, SolicitacaoForm
 def get_url_homepage():
     return url_for('homepage')
 
-@app.route("/")
+@app.route("/") #/homepage é padrão
 def homepage():
     """Renderiza rota para homepage"""
     if current_user:
