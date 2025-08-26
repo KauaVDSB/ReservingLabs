@@ -11,6 +11,13 @@ def get_url_homepage():
 @app.route("/") #/homepage é padrão
 def homepage():
     """Renderiza rota para homepage"""
+
+    labs_total = Laboratorio.query.count()
+    labs_disponiveis = Laboratorio.query.filter_by(status='Disponível').count()
+    solicitacoes_pendentes = Solicitacao.query.filter_by(status='Pendente').count()
+    labs_agendados = Laboratorio.query.all()
+
+
     message=''
     if current_user.is_authenticated:
         username = User.query.get(current_user.id).nome
@@ -18,7 +25,13 @@ def homepage():
     
 
     flash(f'Bem-vindo{message}', 'success')
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        labs_total=labs_total,
+        labs_disponiveis=labs_disponiveis,
+        solicitacoes_pendentes=solicitacoes_pendentes,
+        labs=labs_agendados
+    )
 
 
 """ /AUTH/ """
@@ -121,3 +134,16 @@ def tornar_admin(user_id):
     except Exception as e:
         db.session.rollback()
         return "Falha ao tornar usuário em admin:", e
+
+
+@app.route("/solicitar/delete/<int:solicitacao_id>", methods=["GET", "POST"])
+def solicita_delete(solicitacao_id):
+    solicitacao = Solicitacao.query.get(solicitacao_id)
+
+    try:
+        db.session.delete(solicitacao)
+        db.session.commit()
+        return "Solicitação deletada com sucesso!"
+    except Exception as e:
+        db.session.rollback()
+        return "Falha ao deletar solicitação:", e

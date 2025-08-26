@@ -82,6 +82,8 @@ class Solicitacao(db.Model):
     data_agendada = db.Column(db.DateTime, nullable=False)
     data_encerramento = db.Column(db.DateTime, nullable=False)
 
+    status = db.Column(db.String(20), default="Pendente", nullable=False)
+
     # 'db.ForeignKey' define a chave estrangeira.
     # Estas colunas referenciam os 'id' das tabela referentes.
     # É o lado "muitos" da relação.

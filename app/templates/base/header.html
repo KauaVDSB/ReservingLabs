@@ -1,20 +1,39 @@
-<header class="bg-white shadow-md p-4">
-    <nav class="container mx-auto flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-gray-800">
-            <a href="{{ url_for('homepage') }}">Solicita Lab</a>
-        </h1>
-        <div class="flex items-center space-x-4">
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('labs_list') }}" class="text-gray-600 hover:text-blue-500">Listar Labs</a>
-                <a href="{{ url_for('solicitar_create') }}" class="text-gray-600 hover:text-blue-500">Solicitar Lab</a>
-                {% if current_user.admin %}
-                <a href="{{ url_for('labs_create') }}" class="text-gray-600 hover:text-blue-500">Criar Lab</a>
-                {% endif %}
-                <a href="{{ url_for('logout') }}" class="text-gray-600 hover:text-blue-500">Sair</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-blue-500">Login</a>
-                <a href="{{ url_for('cadastro') }}" class="text-gray-600 hover:text-blue-500">Cadastro</a>
-            {% endif %}
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('homepage') }}">
+                Solicita Lab
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('labs_list') }}">Listar Labs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('solicitar_create') }}">Solicitar Lab</a>
+                        </li>
+                        {% if current_user.admin %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('labs_create') }}">Criar Lab</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Sair</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('cadastro') }}">Cadastro</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
 </header>
