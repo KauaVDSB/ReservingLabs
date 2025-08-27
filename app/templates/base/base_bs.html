@@ -21,21 +21,39 @@
     {% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
-    <!-- Inclui o cabeçalho, que pode ser um arquivo separado -->
-    {% include 'base/header.html' %}
 
-    <main class="container my-5 flex-grow-1">
-        <!-- Bloco para exibir mensagens flash -->
+    <!-- Bloco para exibir mensagens flash -->
+    <div class="toast-container position-fixed top-0 start-0 p-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}" role="alert">
-                        {{ message }}
+                    <div class="toast show border-0" role="alert"
+                        aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="d-flex rounded-3
+                            {% if category == 'success' %} bg-success text-white
+                            {% elif category == 'danger' %} bg-danger text-white
+                            {% else %} bg-secondary text-white
+                            {% endif %}">
+                            <div class="toast-body p-3">
+                                {{ message }}
+                            </div>
+                            <button type="button"
+                                    class="btn-close btn-close-white me-2 m-auto"
+                                    data-bs-dismiss="toast"
+                                    aria-label="close">
+                            </button>
+                        </div>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
+    </div>
 
+
+    <!-- Inclui o cabeçalho, como um arquivo separado -->
+    {% include 'base/header.html' %}
+
+    <main class="container my-5 flex-grow-1">
         <!-- Bloco para o conteúdo principal da página -->
         {% block content %}
         {% endblock %}
@@ -45,7 +63,7 @@
     {% include 'base/footer.html' %}
 
         
-    <!-- JQuery necessário para select2 funcionar -->
+    <!-- JQuery necessário para Bootstrap e Select2 funcionar -->
     <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -57,7 +75,9 @@
     <script
         src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js">
     </script>
-    
+
+    <!-- Script para notificações Toast do Bootstrap -->
+    <script src="{{ url_for('static', filename='js/base/notif_flash.js') }}"></script>
     <!-- Bloco para scripts JavaScript específicos de cada página -->
     {% block scripts %}
     {% endblock %}

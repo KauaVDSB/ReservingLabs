@@ -68,20 +68,17 @@ def cadastro():
 def labs_create():
 
     if not current_user.admin:
-        
-        return (f"Acesso negado. <hr>"
-                f'<a href="{get_url_homepage()}">Voltar</a>')
+        flash('Acesso negado. Apenas administradores podem criar laboratórios.', 'danger')
+        return redirect(url_for("homepage"))
 
     form = LabForm()
-
     if form.validate_on_submit():
-        lab = form.save()
-        if lab:
-            
-            return (
-                f"Laboratório {lab.nome} com capacidade: {lab.capacidade} foi "
-                "criado com sucesso.<hr>"
-                f'<a href="{get_url_homepage()}">Voltar</a>')
+        try:
+            lab = form.save()
+            flash(f"Laboratório '{lab.nome}' criado com sucesso!", 'success')
+            return redirect(url_for("homepage")) # Redireciona para a homepage
+        except Exception as e:
+            flash(f"Erro ao criar laboratório: {e}", 'danger')
 
     return render_template("labs/create.html", form=form)
 
@@ -149,18 +146,29 @@ def solicitar_list():
     return render_template("solicitacoes/list.html", solicitacoes=solicitacoes)
 
 
-@app.route("/solicitar/delete/<int:id>", methods=["GET", "POST"])
+@app.route("/solicitar/delete/<int:solicitacao_id>", methods=["GET", "POST"])
+@login_required
 def solicitar_delete(solicitacao_id):
     solicitacao = Solicitacao.query.get(solicitacao_id)
+    if not solicitacao:
+        flash("Solicitação não encontrada.", "danger")
+        return redirect(url_for("homepage"))
+    
+    if solicitacao.user != current_user or not current_user.admin:
+        flash("Acesso negado. Você não fez esta solicitação ou não é admin.", "danger")
+        return redirect(url_for("homepage"))
+    
 
     try:
         db.session.delete(solicitacao)
         db.session.commit()
-        return (f"Solicitação {solicitacao.id} para o laboratório {solicitacao.lab.nome} deletado com sucesso.")
+        flash(f"Solicitação {solicitacao_id} para o laboratório '{solicitacao.lab.nome}' deletada com sucesso.", 'success')
+        return redirect(url_for("homepage"))
     except Exception as e:
         db.session.rollback()
-        
-        return "falha ao deletar solicitação:", e
+        flash(f"Falha ao deletar a solicitação: {e}", 'danger')
+        return redirect(url_for("homepage"))
+
 
 
 """ /ADMIN/ """
