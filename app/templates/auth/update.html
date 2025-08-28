@@ -1,17 +1,24 @@
 {% extends 'base/base_bs.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Atualizar Perfil{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8 col-sm-10">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-primary text-white rounded-top-4">
-                <h4 class="mb-0 text-center">Bem-vindo(a) de volta!</h4>
+                <h4 class="mb-0 text-center">Atualizar Perfil</h4>
             </div>
             <div class="card-body p-4">
-                <form action="{{ url_for('login') }}" method="post">
+                <form action="{{ url_for('update_profile') }}" method="post">
                     {{ form.csrf_token }}
+                    <div class="mb-3">
+                        {{ form.nome.label(class="form-label") }}
+                        {{ form.nome(class="form-control", placeholder="Seu nome") }}
+                        {% for error in form.nome.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
                     <div class="mb-3">
                         {{ form.email.label(class="form-label") }}
                         {{ form.email(class="form-control", placeholder="Seu e-mail") }}
@@ -19,10 +26,19 @@
                             <div class="text-danger mt-1">{{ error }}</div>
                         {% endfor %}
                     </div>
+                    <hr>
+                    <p class="text-muted text-center">Deixe a senha em branco para não alterá-la.</p>
                     <div class="mb-3">
                         {{ form.senha.label(class="form-label") }}
-                        {{ form.senha(class="form-control", placeholder="Sua senha") }}
+                        {{ form.senha(class="form-control", placeholder="Nova senha (opcional)") }}
                         {% for error in form.senha.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.confirmar_senha.label(class="form-label") }}
+                        {{ form.confirmar_senha(class="form-control", placeholder="Confirme a nova senha") }}
+                        {% for error in form.confirmar_senha.errors %}
                             <div class="text-danger mt-1">{{ error }}</div>
                         {% endfor %}
                     </div>

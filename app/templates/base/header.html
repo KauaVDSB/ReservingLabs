@@ -10,26 +10,66 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('labs_list') }}">Listar Labs</a>
+                        <!-- Dropdown de Ações do Usuário -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if current_user.admin %}
+                                    <i class="fas fa-user-cog me-1"></i> Admin
+                                {% else %}
+                                    <i class="fas fa-user me-1"></i> Perfil
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('update_profile') }}">
+                                        <i class="fas fa-edit me-2"></i> Editar Perfil
+                                    </a>
+                                </li>
+                                {% if current_user.admin %}
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('cadastro') }}">
+                                        <i class="fas fa-user-plus me-2"></i> Cadastrar Novo Usuário
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('logout') }}">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Sair
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('solicitar_create') }}">Solicitar Lab</a>
-                        </li>
-                        {% if current_user.admin %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('labs_create') }}">Criar Lab</a>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Sair</a>
+                        
+                        <!-- Dropdown de Laboratórios -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="labsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-flask me-1"></i> Laboratórios
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="labsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('labs_list') }}">
+                                        <i class="fas fa-list me-2"></i> Listar Labs
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('solicitar_create') }}">
+                                        <i class="fas fa-calendar-plus me-2"></i> Solicitar Lab
+                                    </a>
+                                </li>
+                                {% if current_user.admin %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('labs_create') }}">
+                                        <i class="fas fa-plus-circle me-2"></i> Criar Lab
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('cadastro') }}">Cadastro</a>
                         </li>
                     {% endif %}
                 </ul>

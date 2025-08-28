@@ -1,26 +1,51 @@
-{% extends 'base/base.html' %}
+{% extends 'base/base_bs.html' %}
 
 {% block title %}Cadastro{% endblock %}
 
-
 {% block content %}
-<h1>Cadastro</h1>
-<form action="" method="post">
-
-    {{ form.csrf_token }}
-
-    {{ form.nome(placeholder="Digite seu nome") }}
-    <br>
-    {{ form.email(placeholder="professor@exemplo.com") }}
-    <br>
-    {{ form.senha(placeholder="Digite sua senha") }}
-    <br>
-    {{ form.confirmar_senha(placeholder="Confirme sua senha") }}
-    <br>
-    {{ form.submit() }}
-
-</form>
-
-<a href="{{ url_for('login') }}">Já tem login? Entre agora.</a>
-
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8 col-sm-10">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white rounded-top-4">
+                <h4 class="mb-0 text-center">Cadastre um novo usuário</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="" method="post">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        {{ form.nome.label(class="form-label") }}
+                        {{ form.nome(class="form-control", placeholder="Digite o nome") }}
+                        {% for error in form.nome.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="professor@exemplo.com") }}
+                        {% for error in form.email.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.senha.label(class="form-label") }}
+                        {{ form.senha(class="form-control", placeholder="Digite a senha") }}
+                        {% for error in form.senha.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.confirmar_senha.label(class="form-label") }}
+                        {{ form.confirmar_senha(class="form-control", placeholder="Confirme a senha") }}
+                        {% for error in form.confirmar_senha.errors %}
+                            <div class="text-danger mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg mt-3") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

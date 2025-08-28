@@ -8,7 +8,6 @@ from wtforms import (
     DateTimeField,
     TimeField,
     SelectField,
-
     SubmitField
 )
 from wtforms.validators import (
@@ -19,7 +18,7 @@ from app import db, bcrypt
 from app.models import User, Laboratorio, Solicitacao
 
 
-
+#--- Formulários para Autenticação
 class UserForm(FlaskForm):
     """ Formulário para Cadastro de Usuários """
     nome = StringField("Nome", validators=[DataRequired()])
@@ -36,9 +35,7 @@ class UserForm(FlaskForm):
 
     # Funções 'validate_<campo>' são evocadas automaticamente pelo Flask-WTF.
     def validate_email(self, email):
-        """
-        Verifica se o email já está cadastrado, levantando erro se positivo.
-        """
+        """ Verifica se o email já está cadastrado. """
 
         user = User.query.filter_by(email=email.data).first()
         if user:
@@ -66,20 +63,67 @@ class UserForm(FlaskForm):
 
             db.session.add(user)
             db.session.commit()
-
-
             return user
         except Exception as e:
             # Caso algo dê errado, reverta as alterações no banco e lança um erro.
             db.session.rollback()
             raise ValidationError(
-                "Erro ao salvar usuário:", e
+                f"Erro ao salvar usuário: {e}"
             )
 
 
-# Formulário de login
+class LoginForm(FlaskForm):
+    """ Formulário para Login de Usuários """
+    email = EmailField("E-mail", validators=[DataRequired(), Email()])
+    senha = PasswordField("Senha", validators=[DataRequired()])
+    submit = SubmitField("Entrar")
+
+    def login(self):
+        user = User.query.filter_by(email=self.email.data).first()
+        if user and bcrypt.check_password_hash(user.senha, self.senha.data):
+            return user
+        else:
+            return False
 
 
+class UserUpdateForm(FlaskForm):
+    """ Formulário para Atualização de Usuários """
+    nome = StringField("Nome", validators=[DataRequired()])
+    email = EmailField("E-mail", validators=[DataRequired(), Email()])
+    senha = PasswordField("Nova Senha")
+    confirmar_senha = PasswordField(
+        "Confirme a nova senha",
+        validators=[EqualTo('senha', message='As senhas devem coincidir.')]
+    )
+    submit = SubmitField("Atualizar")
+
+    
+    def validate_email(self, email):
+        """ Verifica se o novo e-mail já está em uso por outro usuário """
+        # Esta validação permite o e-mail atual do próprio usuário.
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError("Este e-mail já está em uso.")
+            
+
+    
+    def update_user(self, user):
+        user.nome = self.nome.data
+        user.email = self.email.data
+
+        if self.senha.data:
+            user.senha = bcrypt.generate_password_hash(self.senha.data).decode("utf-8")
+
+        try:
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            raise ValidationError(f"Erro ao atualizar usuário: {e}")
+
+
+# --- Formulários para Laboratórios
 
 class LabForm(FlaskForm):
     """ Formulário para Manipulação de Laboratórios """
@@ -94,7 +138,7 @@ class LabForm(FlaskForm):
 
 
     def save(self):
-        # Salva objeto na tabela Laboratorios
+        """ Salva objeto na tabela Laboratorios """
 
         try:
             lab = Laboratorio(
@@ -108,12 +152,11 @@ class LabForm(FlaskForm):
             db.session.add(lab)
             db.session.commit()
 
-
             return lab
         except Exception as e:
             db.session.rollback()
             raise ValidationError(
-                "Erro ao cadastrar laboratório:", e
+                f"Erro ao cadastrar laboratório: {e}"
             )
 
 
