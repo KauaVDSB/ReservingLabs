@@ -1,35 +1,143 @@
-{% extends 'base/base.html' %}
+{% extends 'base/base_bs.html' %}
 
-{% block title %}Labs - Lista{% endblock %}
-
+{% block title %}Lista de Laboratórios{% endblock %}
 
 {% block content %}
-<h1>Lista de Laboratórios</h1>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Capacidade</th>
-            <th>Abertura</th>
-            <th>Fechamento</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for lab in labs %}
-            <tr>
-                <th>{{ lab.id }}</th>
-                <th>{{ lab.nome }}</th>
-                <th>{{ lab.capacidade }}</th>
-                <th>{{ lab.abertura }}</th>
-                <th>{{ lab.fechamento }}</th>
-                <th>{{ lab.status }}</th>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Lista de Laboratórios</h1>
+        <a href="{{ url_for('labs_create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> Adicionar Novo Laboratório
+        </a>
+    </div>
 
-<a href="{{ url_for('homepage') }}">Voltar</a>
+    <!-- Formulário de Pesquisa e Limite de Itens por Página -->
+    <form action="{{ url_for('labs_list') }}" method="get" class="mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Pesquisar laboratório..." value="{{ request.args.get('q', '') }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search me-1"></i> Pesquisar
+                    </button>
+                </div>
+            </div>
+            <!-- Correção de layout -->
+            <div class="col-md-3">
+                <div class="d-flex align-items-center">
+                    <label for="limit" class="form-label mb-0 me-2">Itens:</label>
+                    <select id="limit" name="per_page" class="form-select" onchange="this.form.submit()">
+                        <option value="5" {% if labs.per_page == 5 %}selected{% endif %}>5</option>
+                        <option value="10" {% if labs.per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if labs.per_page == 20 %}selected{% endif %}>20</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
 
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            {% if labs.items %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a href="{{ url_for('labs_list', sort_by='nome', order='asc' if request.args.get('sort_by') == 'nome' and request.args.get('order') == 'desc' else 'desc', q=request.args.get('q')) }}">
+                                    Nome <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ url_for('labs_list', sort_by='capacidade', order='asc' if request.args.get('sort_by') == 'capacidade' and request.args.get('order') == 'desc' else 'desc', q=request.args.get('q')) }}">
+                                    Capacidade <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Equipamentos</th>
+                            <th>Horário de Abertura</th>
+                            <th>Horário de Fechamento</th>
+                            <th>
+                                <a href="{{ url_for('labs_list', sort_by='status', order='asc' if request.args.get('sort_by') == 'status' and request.args.get('order') == 'desc' else 'desc', q=request.args.get('q')) }}">
+                                    Status <i class="fas fa-sort"></i>
+                                </a>
+                            </th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lab in labs.items %}
+                        <tr>
+                            <td>{{ lab.nome }}</td>
+                            <td>{{ lab.capacidade }}</td>
+                            <td>{{ lab.equipamentos }}</td>
+                            <td>{{ lab.abertura.strftime('%H:%M') }}</td>
+                            <td>{{ lab.fechamento.strftime('%H:%M') }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if lab.status == 'Ocupado' %} bg-warning
+                                    {% elif lab.status == 'Disponível' %} bg-success
+                                    {% elif lab.status == 'Inativo' %} bg-danger
+                                    {% else %} bg-secondary
+                                    {% endif %}">
+                                    {{ lab.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if current_user.is_authenticated and current_user.admin %}
+                                <a href="{{ url_for('labs_update', lab_id=lab.id) }}" class="btn btn-sm btn-primary text-white me-2" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('labs_delete', lab_id=lab.id) }}" class="btn btn-sm btn-danger" title="Deletar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                Nenhum laboratório encontrado.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Botões de navegação de paginação -->
+    {% if labs.pages > 1 %}
+    <div class="d-flex justify-content-center mt-4">
+        <ul class="pagination">
+            <li class="page-item {% if not labs.has_prev %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('labs_list', page=labs.prev_num if labs.has_prev else 1, per_page=labs.per_page, q=request.args.get('q'), sort_by=request.args.get('sort_by'), order=request.args.get('order')) }}">
+                    Anterior
+                </a>
+            </li>
+            {% for page_num in labs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if labs.page == page_num %}
+                    <li class="page-item active" aria-current="page">
+                        <a class="page-link" href="#">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('labs_list', page=page_num, per_page=labs.per_page, q=request.args.get('q'), sort_by=request.args.get('sort_by'), order=request.args.get('order')) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            <li class="page-item {% if not labs.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('labs_list', page=labs.next_num if labs.has_next else labs.pages, per_page=labs.per_page, q=request.args.get('q'), sort_by=request.args.get('sort_by'), order=request.args.get('order')) }}">
+                    Próximo
+                </a>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

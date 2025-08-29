@@ -51,8 +51,9 @@
                                         <small class="text-muted d-block">{{ lab.equipamentos }}</small>
                                     </div>
                                     <span class="badge 
-                                        {% if lab.status == 'Ocupado' %} bg-danger
+                                        {% if lab.status == 'Ocupado' %} bg-warning
                                         {% elif lab.status == 'Disponível' %} bg-success
+                                        {% elif lab.status == 'Inativo' %} bg-danger
                                         {% else %} bg-secondary
                                         {% endif %}">
                                         {{ lab.status }}

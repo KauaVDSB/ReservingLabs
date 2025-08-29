@@ -3,7 +3,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, db
 from app.models import User, Laboratorio, Solicitacao
-from app.forms import UserForm, LabForm, SolicitacaoForm, LoginForm, UserUpdateForm
+from app.forms import UserForm, LabForm, LabUpdateForm, SolicitacaoForm, LoginForm, UserUpdateForm
 
 
 
@@ -116,12 +116,81 @@ def labs_create():
 
 @app.route("/labs/list", methods=["GET", "POST"])
 def labs_list():
-    labs = Laboratorio.query.all()
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('per_page', 5, type=int)
+    query = request.args.get('q', '')
+    sort_by = request.args.get('sort_by', 'nome')
+    order = request.args.get('order', 'asc')
+
+    labs_query = Laboratorio.query
+
+    if query:
+        labs_query = labs_query.filter(
+            Laboratorio.nome.like(f'%{query}%')
+        )
+    
+    if sort_by:
+        if sort_by == 'nome':
+            if order == 'asc':
+                labs_query = labs_query.order_by(
+                    Laboratorio.nome.asc()
+                )
+            else:
+                labs_query = labs_query.order_by(
+                    Laboratorio.nome.desc()
+                )
+        
+        elif sort_by == 'capacidade':
+            if order == 'asc':
+                labs_query = labs_query.order_by(
+                    Laboratorio.capacidade.asc()
+                )
+            else:
+                labs_query = labs_query.order_by(
+                    Laboratorio.capacidade.desc()
+                )
+        
+        elif sort_by == 'status':
+            if order == 'asc':
+                labs_query = labs_query.order_by(
+                    Laboratorio.status.asc()
+                )
+            else:
+                labs_query = labs_query.order_by(
+                    Laboratorio.status.desc()
+                )
+
+    labs = labs_query.paginate(page=page, per_page=limit, error_out=False)
 
     return render_template("labs/list.html", labs=labs)
 
 
-#TODO: update lab
+
+@app.route("/labs/update/<int:lab_id>", methods=["GET", "POST"])
+@login_required
+def labs_update(lab_id):
+    if not current_user.admin:
+        flash('Acesso negado. Apenas administradores podem editar laboratórios.', 'danger')
+        return redirect(url_for("homepage"))
+
+    lab = Laboratorio.query.get(lab_id)
+    if not lab:
+        flash("Laboratório não encontrado.", "danger")
+        return redirect(url_for("homepage"))
+
+    form = LabUpdateForm(obj=lab)
+    form.lab_id = lab_id
+
+    if form.validate_on_submit():
+        try:
+            if form.update_lab(lab):
+                flash(f"Laboratório '{lab.nome}' atualizado com sucesso!", 'success')
+                return redirect(url_for("labs_list"))
+        except Exception as e:
+            flash(f"Erro ao atualizar laboratório: {e}", 'danger')
+
+    return render_template("labs/update.html", form=form, lab=lab)
+
 
 @app.route("/labs/delete/<int:lab_id>", methods=["GET", "POST"])
 @login_required
@@ -164,10 +233,14 @@ def solicitar_create():
     if form.validate_on_submit():
         try:
             solicitacao = form.save()
+            lab_solicitado = Laboratorio.query.get(solicitacao.id_lab)
+            lab_solicitado.status = 'Ocupado'
+            db.session.commit()
             flash(f"Solicitação criada com sucesso para o laboratório '{solicitacao.lab.nome}'!", 'success')
             return redirect(url_for("homepage"))
         except Exception as e:
             # O formulário já lança uma ValidationError.
+            db.session.rollback()
             flash(f"Erro ao gerar solicitação: {e}", 'danger')
             
     return render_template("solicitacoes/create.html", form=form)
@@ -203,6 +276,35 @@ def solicitar_delete(solicitacao_id):
         flash(f"Falha ao deletar a solicitação: {e}", 'danger')
         return redirect(url_for("homepage"))
 
+
+@app.route("/solicitar/aprovar/<int:solicitacao_id>", methods=["GET", "POST"])
+@login_required
+def solicitar_aprovar(solicitacao_id):
+    if not current_user.admin:
+        flash('Acesso negado. Apenas administradores podem aprovar solicitações de laboratório.', 'danger')
+        return redirect(url_for("homepage"))
+
+    solicitacao = Solicitacao.query.get(solicitacao_id)
+    if not solicitacao:
+        flash("Solicitação não encontrada.", "danger")
+        return redirect(url_for("solicitar_list"))
+    
+    # Verifica se a solicitação ainda está pendente
+    if solicitacao.status != 'Pendente':
+        flash("Esta solicitação não pode ser aprovada, pois ela não está mais pendente.", "danger")
+        return redirect(url_for("solicitar_list"))
+    
+
+    try:
+        solicitacao.status = 'Aprovada'
+        db.session.commit()
+        flash(f"Solicitação '{solicitacao.id}' aprovada com sucesso!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao aprovar solicitação: {e}", "danger")
+    
+    
+    return redirect(url_for("solicitar_list"))
 
 
 """ /ADMIN/ """

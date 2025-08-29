@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy  #CRUD
 from flask_migrate import Migrate  #modelo-->bd
 from flask_bcrypt import Bcrypt  #criptografia//segurança
 from flask_login import LoginManager  #autodescritivo
+from apscheduler.schedulers.background import BackgroundScheduler  #agendador de tarefas
+import atexit  #encerrar tarefas
 
 from dotenv import load_dotenv
 
@@ -33,3 +35,18 @@ from app.models import User, Laboratorio, Solicitacao
 
 # Importa rotas necessárias na inicialização do app
 from app.routes import homepage, login
+
+# Configurações do Cron Job
+from app.scheduler import atualizar_status_laboratorios
+
+scheduler = BackgroundScheduler()
+# Agenda tarefa para rodar a cada 5 minutos
+scheduler.add_job(
+    func=atualizar_status_laboratorios,
+    trigger="interval",
+    minutes=5
+)
+scheduler.start()
+
+# Desliga agendador ao fechar app
+atexit.register(lambda: scheduler.shutdown())

@@ -13,6 +13,7 @@ from wtforms import (
 from wtforms.validators import (
     DataRequired, Email, EqualTo, ValidationError
 )
+import datetime
 
 from app import db, bcrypt
 from app.models import User, Laboratorio, Solicitacao
@@ -137,6 +138,12 @@ class LabForm(FlaskForm):
     submit = SubmitField("Criar Laboratório")
 
 
+    def validate_nome(self, nome):
+        """ Valida se o nome de laboratório já está sendo usado """
+        lab = Laboratorio.query.filter_by(nome=nome.data).first()
+        if lab:
+            raise ValidationError("Já existe um laboratório com este nome.")
+
     def save(self):
         """ Salva objeto na tabela Laboratorios """
 
@@ -161,6 +168,40 @@ class LabForm(FlaskForm):
 
 
 
+class LabUpdateForm(FlaskForm):
+    """ Formulário para atualização de laboratórios """
+    nome = StringField("Nome do laboratório", validators=[DataRequired()])
+    capacidade = IntegerField("Capacidade do laboratório", validators=[DataRequired()])
+    equipamentos = StringField("Equipamentos disponíveis", validators=[DataRequired()])
+    abertura = TimeField("Horário de Abertura", validators=[DataRequired()])
+    fechamento = TimeField("Horário de Fechamento", validators=[DataRequired()])
+    submit = SubmitField("Atualizar Laboratório")
+
+    def validate_nome(self, nome):
+        """ Valida se o nome do laboratório já está em uso por outro laboratório. """
+        lab = Laboratorio.query.filter_by(nome=nome.data).first()
+        if lab and lab.id != self.lab_id: # Permite que o nome do laboratório atual seja o mesmo
+            raise ValidationError('Já existe um laboratório com este nome.')
+
+    def update_lab(self, lab):
+        """ Atualiza os dados do laboratório no banco de dados. """
+        lab.nome = self.nome.data
+        lab.capacidade = self.capacidade.data
+        lab.equipamentos = self.equipamentos.data
+        lab.abertura = self.abertura.data
+        lab.fechamento = self.fechamento.data
+        try:
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            raise ValidationError(f"Erro ao atualizar laboratório: {e}")
+
+
+
+
+#--- Formulários para Solicitações
+
 class SolicitacaoForm(FlaskForm):
     lab = SelectField(
         "Laboratório", coerce=int, choices=[], validators=[DataRequired()]
@@ -182,6 +223,49 @@ class SolicitacaoForm(FlaskForm):
 
     submit = SubmitField("Solicitar")
 
+
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators):
+            return False
+        
+        if self.data_encerramento.data <= self.data_agendada.data:
+            self.data_encerramento.errors.append(
+                "O horário de encerramento deve ser posterior ao de agendamento."
+            )
+            return False
+        
+        if self.data_agendada.data < datetime.datetime.now():
+            self.data_agendada.errors.append(
+                "A data de agendamento não pode ser no passado."
+            )
+            return False
+        
+        lab = Laboratorio.query.get(self.lab.data)
+        if lab:
+            hora_agendada = self.data_agendada.data.time()
+            hora_encerramento = self.data_encerramento.data.time()
+
+            if not (lab.abertura <= hora_agendada and lab.fechamento >= hora_encerramento):
+                    self.data_agendada.errors.append(
+                        f"O horário de agendamento deve ser entre {lab.abertura.strftime('%H:%M')} e"
+                        f"{lab.fechamento.strftime('%H:%M')}."
+                    )
+                    return False
+            
+            # Verifica se há conflitos de horários com solicitações Pendentes ou Aprovadas
+            conflitos = Solicitacao.query.filter_by(id_lab=lab.id).filter(
+                (Solicitacao.status == 'Pendente') | (Solicitacao.status == 'Aprovada')
+            ).filter(
+                (Solicitacao.data_agendada < self.data_encerramento.data) &
+                (Solicitacao.data_encerramento > self.data_agendada.data)
+            ).count()
+
+            if conflitos > 0:
+                self.lab.errors.append("Já existe uma solicitação para este laboratório neste horário.")
+                return False
+        
+        return True
+                            
 
     def save(self):
 
