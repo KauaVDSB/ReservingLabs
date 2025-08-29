@@ -1,0 +1,69 @@
+{% extends 'base/base_bs.html' %}
+
+{% block title %}Atualizar Laboratório{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4">
+                    <h4 class="mb-0 text-center">Atualizar Laboratório: {{ lab.nome }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('labs_update', lab_id=lab.id) }}" method="post">
+                        {{ form.csrf_token }}
+
+                        <div class="mb-3">
+                            {{ form.nome.label(class="form-label") }}
+                            {{ form.nome(class="form-control", placeholder="Nome do Lab.") }}
+                            {% for error in form.nome.errors %}
+                                <div class="text-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.capacidade.label(class="form-label") }}
+                            {{ form.capacidade(class="form-control", placeholder="Ex: 30") }}
+                            {% for error in form.capacidade.errors %}
+                                <div class="text-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.equipamentos.label(class="form-label") }}
+                            {{ form.equipamentos(class="form-control", placeholder="Ex: 30 Computadores, 1 Projetor...") }}
+                            {% for error in form.equipamentos.errors %}
+                                <div class="text-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                {{ form.abertura.label(class="form-label") }}
+                                {{ form.abertura(class="form-control", placeholder="Ex: 10:00") }}
+                                {% for error in form.abertura.errors %}
+                                    <div class="text-danger mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.fechamento.label(class="form-label") }}
+                                {{ form.fechamento(class="form-control", placeholder="Ex: 21:40") }}
+                                {% for error in form.fechamento.errors %}
+                                    <div class="text-danger mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg mt-3") }}
+                            <a href="{{ url_for('labs_list') }}" class="btn btn-secondary btn-lg">Voltar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

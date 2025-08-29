@@ -1,0 +1,71 @@
+{% extends 'base/base_bs.html' %}
+
+{% block title %}Lista de Solicitações{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4 text-center">Minhas Solicitações</h1>
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            {% if solicitacoes %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Laboratório</th>
+                            <th>Solicitante</th>
+                            <th>Data de Início</th>
+                            <th>Data de Fim</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for solicitacao in solicitacoes %}
+                        <tr>
+                            <td>{{ solicitacao.id }}</td>
+                            <td>{{ solicitacao.lab.nome }}</td>
+                            <td>{{ solicitacao.user.nome }}</td>
+                            <td>{{ solicitacao.data_agendada.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ solicitacao.data_encerramento.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if solicitacao.status == 'Pendente' %} bg-warning text-dark
+                                    {% elif solicitacao.status == 'Aprovada' %} bg-success
+                                    {% elif solicitacao.status == 'Rejeitada' %} bg-danger
+                                    {% else %} bg-secondary
+                                    {% endif %}">
+                                    {{ solicitacao.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if current_user.admin or solicitacao.user == current_user %}
+                                <a href="{{ url_for('solicitar_delete', solicitacao_id=solicitacao.id) }}"
+                                    class="btn btn-sm btn-danger"
+                                    title="Deletar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                                {% endif %}
+                                {% if current_user.admin and solicitacao.status == 'Pendente' %}
+                                <a href="{{ url_for('solicitar_aprovar', solicitacao_id=solicitacao.id) }}"
+                                    class="btn btn-sm btn-success"
+                                    title="Aprovar">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                Nenhuma solicitação encontrada.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
