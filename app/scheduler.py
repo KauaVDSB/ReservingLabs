@@ -42,7 +42,7 @@ def atualizar_status_laboratorios():
 
             # Se não houver solicitações ocorrendo no momento, o status volta para 'Disponível'
             if solicitacoes_ocorrendo == 0:
-                lab.status = 'Disponivel'
+                lab.status = 'Disponível'
                 db.session.add(lab)
         
         db.session.commit()

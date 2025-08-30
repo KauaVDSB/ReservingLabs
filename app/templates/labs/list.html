@@ -75,7 +75,7 @@
                             <td>
                                 <span class="badge 
                                     {% if lab.status == 'Ocupado' %} bg-warning
-                                    {% elif lab.status == 'Disponível' %} bg-success
+                                    {% elif lab.status == 'Disponível' or lab.status == 'Disponivel' %} bg-success
                                     {% elif lab.status == 'Inativo' %} bg-danger
                                     {% else %} bg-secondary
                                     {% endif %}">

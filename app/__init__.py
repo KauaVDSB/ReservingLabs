@@ -35,6 +35,7 @@ from app.models import User, Laboratorio, Solicitacao
 
 # Importa rotas necessárias na inicialização do app
 from app.routes import homepage, login
+from app.api.agendamentos import api_agendamentos
 
 # Configurações do Cron Job
 from app.scheduler import atualizar_status_laboratorios

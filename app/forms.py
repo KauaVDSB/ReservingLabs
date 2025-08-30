@@ -245,6 +245,9 @@ class SolicitacaoForm(FlaskForm):
             hora_agendada = self.data_agendada.data.time()
             hora_encerramento = self.data_encerramento.data.time()
 
+            if lab.status == 'Inativo':
+                return False
+
             if not (lab.abertura <= hora_agendada and lab.fechamento >= hora_encerramento):
                     self.data_agendada.errors.append(
                         f"O horário de agendamento deve ser entre {lab.abertura.strftime('%H:%M')} e"
