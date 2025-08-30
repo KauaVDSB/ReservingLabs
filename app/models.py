@@ -7,7 +7,7 @@ import datetime #salvar horarios
 @login_manager.user_loader #identificador da função
 def load_user(user_id):
     """ Função wrapper para recuperar dados do usuário. """
-      #mantem os usuarios logados
+    #mantem os usuarios logados
     return User.query.get(int(user_id)) #verificar dados do usuario do tal id
 
 

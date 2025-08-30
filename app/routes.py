@@ -5,16 +5,33 @@ from app import app, db
 from app.models import User, Laboratorio, Solicitacao
 from app.forms import UserForm, LabForm, LabUpdateForm, SolicitacaoForm, LoginForm, UserUpdateForm
 
+import datetime
+
 
 
 @app.route("/") #/homepage é padrão
 def homepage():
     """ Renderiza rota para homepage """
 
+    # Resumo dos Laboratórios para o painel de controle
     labs_total = Laboratorio.query.count()
     labs_disponiveis = Laboratorio.query.filter_by(status='Disponível').count()
     solicitacoes_pendentes = Solicitacao.query.filter_by(status='Pendente').count()
-    labs_agendados = Laboratorio.query.all()
+    
+    agora = datetime.datetime.now()
+    prazo_limite = agora + datetime.timedelta(days=2)
+
+    labs_disponiveis_agora = Laboratorio.query.filter_by(
+        status='Disponível'
+    ).all()
+
+    for lab in labs_disponiveis_agora:
+        lab.proximo_agendamento = Solicitacao.query.filter(
+            Solicitacao.id_lab == lab.id,
+            Solicitacao.data_agendada >= agora,
+            Solicitacao.data_encerramento <= prazo_limite,
+            Solicitacao.status == 'Aprovada' 
+        ).order_by(Solicitacao.data_agendada.asc()).first()
 
 
     return render_template(
@@ -22,7 +39,7 @@ def homepage():
         labs_total=labs_total,
         labs_disponiveis=labs_disponiveis,
         solicitacoes_pendentes=solicitacoes_pendentes,
-        labs=labs_agendados
+        labs_disponiveis_agora=labs_disponiveis_agora
     )
 
 
@@ -227,7 +244,9 @@ def solicitar_create():
     form = SolicitacaoForm()
 
     # Busca lista de laboratórios para popular campo de seleção dinâmica de laboratório.
-    labs = Laboratorio.query.order_by(Laboratorio.nome).all()
+    labs = Laboratorio.query.filter(
+        Laboratorio.status != 'Inativo'
+    ).order_by(Laboratorio.nome).all()
     form.lab.choices = [(lab.id, lab.nome) for lab in labs]
 
     if form.validate_on_submit():

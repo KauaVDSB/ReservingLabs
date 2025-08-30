@@ -34,41 +34,58 @@
         </div>
     </div>
 
-    <!-- Lista de laboratórios ocupados ou agendados para hoje -->
+    <!-- Calendário e Lista de Agendamentos -->
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-lg-8 mb-4 mb-lg-0">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-white rounded-top-4">
-                    <h4 class="mb-0">Laboratórios Agendados para Hoje</h4>
+                    <h4 class="mb-0">Calendário de Agendamentos</h4>
                 </div>
-                <div class="card-body">
-                    {% if labs %}
-                        <ul class="list-group list-group-flush">
-                            {% for lab in labs %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ lab.nome }}</strong>
-                                        <small class="text-muted d-block">{{ lab.equipamentos }}</small>
-                                    </div>
-                                    <span class="badge 
-                                        {% if lab.status == 'Ocupado' %} bg-warning
-                                        {% elif lab.status == 'Disponível' %} bg-success
-                                        {% elif lab.status == 'Inativo' %} bg-danger
-                                        {% else %} bg-secondary
-                                        {% endif %}">
-                                        {{ lab.status }}
-                                    </span>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                <div class="card-body p-4">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white rounded-top-4">
+                    <h4 class="mb-0">Laboratórios Disponíveis Agora</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if labs_disponiveis > 0 %}
+                    <ul class="list-group list-group-flush">
+                        {% for lab in labs_disponiveis_agora %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ lab.nome }}</strong>
+                                <small class="text-muted d-block">{{ lab.equipamentos }}</small>
+                            </div>
+                            {% if lab.proximo_agendamento %}
+                            <span class="badge bg-info text-dark">
+                                Próximo agendamento: {{ lab.proximo_agendamento.data_agendada.strftime('%d/%m/%Y às %H:%M') }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success">Disponível</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
                     {% else %}
-                        <div class="alert alert-info text-center" role="alert">
-                            Nenhum laboratório agendado para hoje.
-                        </div>
+                    <div class="alert alert-info text-center" role="alert">
+                        Nenhum laboratório disponível no momento.
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+    <!-- FullCalendar JS e suas dependências -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src="{{ url_for('static', filename='js/modules/fullcalendar.js') }}"></script>
 {% endblock %}
