@@ -1,4 +1,5 @@
 # Classes para data e horário
+#analogo a structs do C
 class Data:
     def __init__(self, dia: int, mes: int, ano: int):
         self.dia = dia

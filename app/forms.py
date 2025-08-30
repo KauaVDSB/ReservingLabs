@@ -57,6 +57,7 @@ class UserForm(FlaskForm):
 
         try:
             """ Tenta salvar dados do usuário no banco de dados. """
+              #setar alterações
             user = User(
                 nome = self.nome.data,
                 email = self.email.data,
