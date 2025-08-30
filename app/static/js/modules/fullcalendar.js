@@ -1,7 +1,6 @@
 // Cria objeto de Cache para guardar dados
 const eventCache = {};
 
-
 function getCacheKey(start, end) {
     return `${start.toISOString()}_${end.toISOString()}`;
 }
