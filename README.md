@@ -57,7 +57,7 @@ Plataforma de agendamento e gerenciamento de laboratórios para professores, con
 **1. Clone o repositório**
 
 ```CMD
-git clone [https://github.com/KauaVDSB/solicita-lab.git](https://github.com/KauaVDSB/solicita-lab.git)
+git clone https://github.com/KauaVDSB/ReservingLabs.git
 cd solicita-lab
 ```
     
