@@ -15,7 +15,7 @@ from wtforms.validators import (
 )
 import datetime
 
-from app import db, bcrypt
+from app import db  #, bcrypt
 from app.models import User, Laboratorio, Solicitacao
 
 
@@ -47,11 +47,11 @@ class UserForm(FlaskForm):
         """ Salva o usuário no banco de dados. """
 
         # Criptografa a senha usando hash.
-        senha = bcrypt.generate_password_hash(self.senha.data).decode("utf-8")
+        # senha = bcrypt.generate_password_hash(self.senha.data).decode("utf-8")
         
         # Valida se a criptografia foi realizada corretamente a partir do salt.
-        if not str(senha).startswith("$2b$"):
-            raise ValidationError("Falha ao criptografar senha corretamente.")
+        # if not str(senha).startswith("$2b$"):
+        #     raise ValidationError("Falha ao criptografar senha corretamente.")
         
 
         try:
@@ -59,7 +59,7 @@ class UserForm(FlaskForm):
             user = User(
                 nome = self.nome.data,
                 email = self.email.data,
-                senha = senha
+                senha = self.senha.data
             )
 
             db.session.add(user)
@@ -81,7 +81,7 @@ class LoginForm(FlaskForm):
 
     def login(self):
         user = User.query.filter_by(email=self.email.data).first()
-        if user and bcrypt.check_password_hash(user.senha, self.senha.data):
+        if user and user.senha == self.senha.data:
             return user
         else:
             return False
@@ -113,8 +113,8 @@ class UserUpdateForm(FlaskForm):
         user.nome = self.nome.data
         user.email = self.email.data
 
-        if self.senha.data:
-            user.senha = bcrypt.generate_password_hash(self.senha.data).decode("utf-8")
+        # if self.senha.data:
+        #     user.senha = bcrypt.generate_password_hash(self.senha.data).decode("utf-8")
 
         try:
             db.session.commit()
