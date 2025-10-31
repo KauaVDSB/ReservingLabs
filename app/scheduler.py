@@ -47,3 +47,5 @@ def atualizar_status_laboratorios():
         
         db.session.commit()
         print(f"Status dos laboratórios atualizados às {agora.strftime('%d-%m-%Y %H:%M:%S')}.")
+        return(f"Status dos laboratórios atualizados às {agora.strftime('%d-%m-%Y %H:%M:%S')}.", 200)
+

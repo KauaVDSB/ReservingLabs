@@ -4,9 +4,17 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app import app, db
 from app.models import User, Laboratorio, Solicitacao
 from app.forms import UserForm, LabForm, LabUpdateForm, SolicitacaoForm, LoginForm, UserUpdateForm
+from app.scheduler import atualizar_status_laboratorios
 
 import datetime
 
+
+@app.route("/api/cron/update/status-lab")
+def update_status_labs():
+    try:
+        atualizar_status_laboratorios()
+    except Exception as e:
+        return f"Erro ao atualizar status dos laboratórios: {e}", 500
 
 
 @app.route("/") #/homepage é padrão
